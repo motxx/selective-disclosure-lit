@@ -1,0 +1,36 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://w3id.org/citizenship/v1",
+    "https://w3id.org/security/bbs/v1"
+  ],
+  "id": "https://issuer.oidp.uscis.gov/credentials/83627465",
+  "type": ["VerifiableCredential", "PermanentResidentCard"],
+  "issuer": "did:example:489398593",
+  "identifier": "83627465",
+  "name": "Permanent Resident Card",
+  "description": "Government of Example Permanent Resident Card.",
+  "issuanceDate": "2019-12-03T12:19:52Z",
+  "expirationDate": "2029-12-03T12:19:52Z",
+  "credentialSubject": {
+    "id": "did:ethr:0xD32241f26f604E4dD2523b12aD21fD029EAF0F2D",
+    "type": ["PermanentResident", "Person"],
+    "givenName": "Sana",
+    "familyName": "Natori",
+    "gender": "Female",
+    "image": "data:image/png;base64,iVBORw0KGgokJggg==",
+    "residentSince": "2015-01-01",
+    "lprCategory": "C09",
+    "lprNumber": "999-999-999",
+    "commuterClassification": "C1",
+    "birthCountry": "Japan",
+    "birthDate": "2006-03-07"
+  },
+  "proof": {
+    "type": "BbsBlsSignature2020",
+    "created": "2023-06-25T11:43:33Z",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "q61iM6UnbK6J7v6h+GOoKncmJVgOOVPpaBcg2cyv/aK41Gu1rvtVQr4rluYzerFDDmJj1ic6CIhLdhexckxssyRUfboyU/RmzEdx+4TST15xEOTvZMtwco/x2Zq/UI53UF6e1bCW4Sg6bUhUhTjpew==",
+    "verificationMethod": "did:example:489398593#test"
+  }
+}
