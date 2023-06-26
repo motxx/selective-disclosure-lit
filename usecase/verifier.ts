@@ -1,5 +1,5 @@
-import * as store from '~/lib/credentials-storage';
-import * as zkcreds from '~/lib/credentials-bbs-bls';
+import * as store from '~/lib/credentials/store';
+import * as zkcreds from '~/lib/credentials/bbs-bls';
 import { Web3 } from '~/lib/web3';
 
 export const verifyPresentation = async (presentation: any) => {

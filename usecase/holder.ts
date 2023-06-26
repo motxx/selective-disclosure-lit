@@ -1,6 +1,6 @@
-import * as store from '~/lib/credentials-storage';
+import * as store from '~/lib/credentials/store';
+import * as zkcreds from '~/lib/credentials/bbs-bls';
 import { Web3 } from '~/lib/web3';
-import * as zkcreds from '~/lib/credentials-bbs-bls';
 
 type PresentationArgs = {
   credentialName: string;

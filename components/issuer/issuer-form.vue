@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import inputDocument from '~/lib/credentials-bbs/data/inputDocument.json';
+import inputDocument from '~/lib/credentials/bbs-bls/data/inputDocument.json';
 import * as issuer from '~/usecase/issuer';
 
 const genders = ['Female', 'Male', 'Others'];

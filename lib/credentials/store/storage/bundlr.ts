@@ -1,5 +1,5 @@
 import { WebBundlr } from '@bundlr-network/client';
-import { Web3 } from './web3';
+import { Web3 } from '~/lib/web3';
 
 export class Bundlr {
   private bundlr: WebBundlr;

@@ -1,4 +1,4 @@
-import { Web3 } from './web3';
+import { Web3 } from '../web3';
 import { Bls12381G2KeyPair } from '@mattrglobal/jsonld-signatures-bbs';
 
 export class Base58KeyPairGenerator {

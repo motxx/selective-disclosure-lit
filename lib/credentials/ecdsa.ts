@@ -2,9 +2,9 @@ import * as EcdsaMultikey from '@digitalbazaar/ecdsa-multikey';
 import * as ecdsaSd2023Cryptosuite from '@digitalbazaar/ecdsa-sd-2023-cryptosuite';
 import { DataIntegrityProof } from '@digitalbazaar/data-integrity';
 import jsigs from 'jsonld-signatures';
-import { unsignedCredential } from './credentials-ecdsa/example/unsignedCredential';
-import { loader } from './credentials-ecdsa/example/documentLoader.js';
-import { EcdsaMultikeyKeyPair } from './credentials-ecdsa/types';
+import { unsignedCredential } from './ecdsa/example/unsignedCredential';
+import { loader } from './ecdsa/example/documentLoader.js';
+import { EcdsaMultikeyKeyPair } from './ecdsa/types';
 
 const { createSignCryptosuite, createDiscloseCryptosuite } =
   ecdsaSd2023Cryptosuite;
