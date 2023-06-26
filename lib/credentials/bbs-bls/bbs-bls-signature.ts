@@ -26,7 +26,7 @@ const customDocLoader = (url: string): any => {
   // TODO: DIDDocumentのストレージから取得する
   if (url === 'did:example:489398593#test') {
     const serializedValue = window.localStorage.getItem(
-      'issuer-keypair-options',
+      'Issuer-KeyPair-DIDKey',
     );
     if (serializedValue) {
       return {

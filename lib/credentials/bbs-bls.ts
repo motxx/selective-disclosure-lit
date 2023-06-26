@@ -1,7 +1,7 @@
 import { KeyPairOptions } from '@mattrglobal/jsonld-signatures-bbs';
 import { Base58KeyPairGenerator } from './base58-key-pair-generator';
-import * as bbs from './credentials-bbs/bbs-bls-signature';
-import { Web3 } from './web3';
+import * as bbs from './bbs-bls/bbs-bls-signature';
+import { Web3 } from '../web3';
 
 export const generateMockKeyPairOptions = async (): Promise<KeyPairOptions> => {
   const web3 = await Web3.connectWallet();

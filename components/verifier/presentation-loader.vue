@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import * as verifier from '~/usecase/verifier';
+
+const credentialName = ref('PermanentResidentCard');
 const presentation = ref('');
 
 const emit = defineEmits(['presentation-downloaded']);
 
 const downloadPresentation = async () => {
-  const serialized = await verifier.downloadPresentation();
-  if (serialized) {
-    const givenPresentation = JSON.parse(serialized);
-    presentation.value = JSON.stringify(givenPresentation, null, 4);
-    emit('presentation-downloaded', givenPresentation);
+  const result = await verifier.downloadPresentation(credentialName.value);
+  if (result) {
+    presentation.value = JSON.stringify(result, null, 4);
+    emit('presentation-downloaded', result);
   } else {
     presentation.value = '';
     emit('presentation-downloaded', null);
