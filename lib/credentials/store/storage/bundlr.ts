@@ -26,6 +26,16 @@ export class Bundlr {
     return uploadResponse.id;
   }
 
+  async download(id: string) {
+    const response = await fetch(this.createDownloadURL(id));
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const text = await response.text();
+    return text;
+  }
+
   createDownloadURL(id: string) {
     return `https://arweave.net/${id}`;
   }

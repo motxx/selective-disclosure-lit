@@ -1,6 +1,6 @@
 import AWS, { AWSError, S3 } from 'aws-sdk';
-import { EncryptedText } from './types/encryption';
-import { deserialize, serialize } from './utils';
+import { EncryptedText } from '~/lib/types/encryption';
+import { deserialize, serialize } from '~/lib/utils';
 
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
