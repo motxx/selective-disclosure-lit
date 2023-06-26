@@ -1,3 +1,4 @@
+import * as store from '~/lib/credentials-storage';
 import * as zkcreds from '~/lib/credentials-bbs-bls';
 import { Web3 } from '~/lib/web3';
 
@@ -9,10 +10,8 @@ export const verifyPresentation = async (presentation: any) => {
   return res;
 };
 
-export const downloadPresentation = async () => {
+export const downloadPresentation = async (credentialName: string) => {
   const web3 = await Web3.connectWallet();
-  const verifierAddress = await web3.getAddress();
-  const key = `presentation-${verifierAddress}`;
-  const presentation = window.localStorage.getItem(key);
-  return presentation ?? '';
+  const verifierId = await web3.getAddress();
+  return await store.downloadPresentation(verifierId, credentialName);
 };

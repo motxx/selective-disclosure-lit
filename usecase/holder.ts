@@ -1,3 +1,5 @@
+import * as store from '~/lib/credentials-storage';
+import { Web3 } from '~/lib/web3';
 import * as zkcreds from '~/lib/credentials-bbs-bls';
 
 type PresentationArgs = {
@@ -12,7 +14,7 @@ export const fetchCredential = async (credentialName: string) => {
 };
 
 export const createPresentation = async (
-  verifierAddress: string,
+  verifierId: string,
   {
     credentialName,
     nameDisclosure,
@@ -30,26 +32,12 @@ export const createPresentation = async (
     genderDisclosure,
     countryDisclosure,
   );
-  await uploadPresentation(verifierAddress, presentation);
+  await store.uploadPresentation(verifierId, credentialName, presentation);
   return presentation;
 };
 
-// TODO: S3やIPFS/Arweaveから取得する
 const downloadCredential = async (credentialName: string) => {
-  const key = `signedDocument-${credentialName}`;
-  const serializedValue = window.localStorage.getItem(key);
-  if (serializedValue) {
-    return JSON.parse(serializedValue);
-  }
-  return null;
-};
-
-// TODO: S3やIPFS/Arweaveに保存する
-const uploadPresentation = async (
-  verifierAddress: string,
-  presentation: any,
-) => {
-  const key = `presentation-${verifierAddress}`;
-  const serializedValue = JSON.stringify(presentation);
-  window.localStorage.setItem(key, serializedValue);
+  const web3 = await Web3.connectWallet();
+  const holderId = await web3.getAddress();
+  return await store.downloadCredential(holderId, credentialName);
 };
