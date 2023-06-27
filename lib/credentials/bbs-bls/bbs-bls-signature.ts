@@ -77,9 +77,12 @@ export const deriveProof = async (
 
 export const verifyProof = async (presentation: any) => {
   console.log('presentation', presentation);
-  // catchできないWasmのエラーが発生する
+  // * catchできないWasmのエラーが発生する (実行しているプロセスが違うとか??)
   // Uncaught (in promise) RuntimeError: unreachable
+  // ref: https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Exception
   // presentation.proof.proofValue = 'AB';
+  // * credentialの内容を変えるとfalseを返す
+  // presentation.credentialSubject.familyName = 'Hoge';
 
   const result = await verify(presentation, {
     suite: new bbs.BbsBlsSignatureProof2020(),
