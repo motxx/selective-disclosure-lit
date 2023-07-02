@@ -15,3 +15,10 @@ export const issueCredential = async (
   );
   await store.uploadCredential(holderId, credentialName, signedDocument);
 };
+
+export const revokeCredential = async (
+  holderAddress: string,
+  credentialName: string,
+) => {
+  console.log('revoke');
+};

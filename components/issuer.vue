@@ -13,7 +13,12 @@
       >
         Create Verifiable Credential
       </h2>
-      <issuer-form />
+      <div class="w-full max-w-lg">
+        <issuer-issue-form />
+      </div>
+      <div class="w-full max-w-lg">
+        <issuer-revoke-form />
+      </div>
     </div>
   </section>
 </template>
