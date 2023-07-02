@@ -17,6 +17,7 @@
     "@types/secp256k1": "^4.0.3",
     "autoprefixer": "^10.4.14",
     "ipfs-only-hash": "^4.0.0",
+    "license-checker": "^25.0.1",
     "nuxt": "^3.4.1",
     "tailwindcss": "^3.2.7",
     "ts-node": "latest",
