@@ -11,7 +11,7 @@ async function main(): Promise<void> {
   // to make sure everything is compiled
   // await run("compile");
   // We get the contract to deploy
-  const TestTokenFactory: ContractFactory = await ethers.getContractFactory("RevocationTree");
+  const TestTokenFactory: ContractFactory = await ethers.getContractFactory("RevocationStore");
   const testToken: Contract = await TestTokenFactory.deploy();
   await testToken.deployed();
   console.log("TestToken deployed to: ", testToken.address);
