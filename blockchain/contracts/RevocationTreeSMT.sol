@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 //import "../node_modules/fuel-merkle-sol/contracts/tree/sparse/SparseMerkleTree.sol";
 import "fuel-merkle-sol/contracts/tree/sparse/SparseMerkleTree.sol";
 
-contract RevocationTree {
+contract RevocationTreeSMT {
   bytes32 public root;
 
   function verifyCompact(

@@ -8,21 +8,26 @@ import DeepSparseMerkleSubTree from "@fuel-ts/sparsemerkle/dist/deepSparseMerkle
 import SparseCompactMerkleSolidityProof from "@fuel-ts/sparsemerkle/dist/types/sparseCompactMerkleSolidityProof";
 import SparseMerkleSolidityNode from "@fuel-ts/sparsemerkle/dist/types/sparseMerkleSolidityNode";
 import SparseCompactMerkleBranch from "@fuel-ts/sparsemerkle/dist/types/sparseCompactMerkleBranch";
-import { RevocationTree } from "../typechain";
+import { RevocationTreeSMT } from "../typechain";
 import { ZERO } from "./utils/constants";
-import { MerkleBranchStruct } from "../typechain/RevocationTree";
+import { MerkleBranchStruct } from "../typechain/RevocationTreeSMT";
 import SparseCompactMerkleProof from "@fuel-ts/sparsemerkle/dist/types/sparseCompactMerkleProof";
+import { Contract } from "ethers";
 
-describe("RevocationTree", () => {
+describe("RevocationTreeSMT", () => {
   let deployer: SignerWithAddress;
-  let smtContract: RevocationTree;
+  let sbmtlib: Contract;
+  let smtContract: RevocationTreeSMT;
 
   before(async () => {
     [deployer] = await ethers.getSigners();
     const sparseMerkleFactory = await ethers.getContractFactory("SparseMerkleTree");
-    const sbmtlib = await sparseMerkleFactory.deploy();
+    sbmtlib = await sparseMerkleFactory.deploy();
     await sbmtlib.deployed();
-    const factory = await ethers.getContractFactory("RevocationTree", {
+  });
+
+  beforeEach(async () => {
+    const factory = await ethers.getContractFactory("RevocationTreeSMT", {
       libraries: {
         SparseMerkleTree: sbmtlib.address,
       },
@@ -121,7 +126,7 @@ describe("RevocationTree", () => {
     const updateData = async (
       smt: SparseMerkleTree,
       dsmst: DeepSparseMerkleSubTree,
-      smtContract: RevocationTree,
+      smtContract: RevocationTreeSMT,
       keys: string[],
       branches: MerkleBranchStruct[],
       newData: string,
@@ -142,7 +147,7 @@ describe("RevocationTree", () => {
     const deleteData = async (
       smt: SparseMerkleTree,
       dsmst: DeepSparseMerkleSubTree,
-      smtContract: RevocationTree,
+      smtContract: RevocationTreeSMT,
       branches: MerkleBranchStruct[],
       keyToDelete: string,
     ) => {

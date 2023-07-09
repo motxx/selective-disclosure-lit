@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
-    "postinstall": "typechain --target=ethers-v5 --out-dir=typechain 'artifacts/contracts/RevocationTree.sol/RevocationTree.json'",
+    "postinstall": "typechain --target=ethers-v5 --out-dir=typechain 'artifacts/contracts/RevocationTreeSMT.sol/RevocationTreeSMT.json'",
     "test": "npx hardhat test",
     "test:gas": "UPDATE_SNAPSHOT=1 yarn test --grep gas",
     "clean": "rm -rf ./artifacts ./cache ./typechain",
