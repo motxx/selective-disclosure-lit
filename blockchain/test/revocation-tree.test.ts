@@ -15,12 +15,10 @@ import SparseCompactMerkleProof from "@fuel-ts/sparsemerkle/dist/types/sparseCom
 
 describe("RevocationTree", () => {
   let deployer: SignerWithAddress;
-  let sender: SignerWithAddress;
-  let receiver: SignerWithAddress;
   let smtContract: RevocationTree;
 
   before(async () => {
-    [deployer, sender, receiver] = await ethers.getSigners();
+    [deployer] = await ethers.getSigners();
     const sparseMerkleFactory = await ethers.getContractFactory("SparseMerkleTree");
     const sbmtlib = await sparseMerkleFactory.deploy();
     await sbmtlib.deployed();
