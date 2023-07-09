@@ -1,4 +1,5 @@
 import { ethers } from "hardhat";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import hash from "./utils/cryptography";
 import { uintToBytes32 } from "./utils/utils";
@@ -8,8 +9,9 @@ import SparseCompactMerkleSolidityProof from "@fuel-ts/sparsemerkle/dist/types/s
 import SparseMerkleSolidityNode from "@fuel-ts/sparsemerkle/dist/types/sparseMerkleSolidityNode";
 import SparseCompactMerkleBranch from "@fuel-ts/sparsemerkle/dist/types/sparseCompactMerkleBranch";
 import { RevocationTree } from "../typechain";
-import { ZERO } from './utils/constants';
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { ZERO } from "./utils/constants";
+import { MerkleBranchStruct } from "../typechain/RevocationTree";
+import SparseCompactMerkleProof from "@fuel-ts/sparsemerkle/dist/types/sparseCompactMerkleProof";
 
 describe("RevocationTree", () => {
   let deployer: SignerWithAddress;
@@ -19,105 +21,140 @@ describe("RevocationTree", () => {
 
   before(async () => {
     [deployer, sender, receiver] = await ethers.getSigners();
-		const sparseMerkleFactory = await ethers.getContractFactory('SparseMerkleTree');
-		const sbmtlib = await sparseMerkleFactory.deploy();
-		await sbmtlib.deployed();
+    const sparseMerkleFactory = await ethers.getContractFactory("SparseMerkleTree");
+    const sbmtlib = await sparseMerkleFactory.deploy();
+    await sbmtlib.deployed();
     const factory = await ethers.getContractFactory("RevocationTree", {
-      libraries: { SparseMerkleTree: sbmtlib.address },
+      libraries: {
+        SparseMerkleTree: sbmtlib.address,
+      },
     });
     smtContract = await factory.deploy();
   });
 
-  const claim = {
-    key: "familyName",
-    value: "Natori",
+  const buildSolidityProof = (compactMembershipProof: SparseCompactMerkleProof): SparseCompactMerkleSolidityProof => {
+    const { SideNodes, NonMembershipLeafData, BitMask, NumSideNodes, SiblingData } = compactMembershipProof;
+
+    return new SparseCompactMerkleSolidityProof(
+      SideNodes,
+      new SparseMerkleSolidityNode(NonMembershipLeafData),
+      BitMask,
+      NumSideNodes,
+      new SparseMerkleSolidityNode(SiblingData),
+    );
   };
 
-  const createTsSMT = async () => {
-    // Create a SMT
+  describe("Proof verification", () => {
     const smt = new SparseMerkleTree();
     const data = uintToBytes32(42);
 
-    // Add some leaves
-    for (let i = 0; i < 100; i += 1) {
-      const key = hash(uintToBytes32(i));
-      smt.update(key, data);
-    }
-
-    const indexToProve = 51;
-    const keyToProve = hash(uintToBytes32(indexToProve));
-    const compactMembershipProof = smt.proveCompacted(keyToProve);
-
-    // Need to convert typescript proof (with raw data) into solidity proof (with nodes):
-    const proofSideNodes = compactMembershipProof.SideNodes;
-    const nonMembershipLeaf = new SparseMerkleSolidityNode(compactMembershipProof.NonMembershipLeafData);
-    const bitmask = compactMembershipProof.BitMask;
-    const numSideNodes = compactMembershipProof.NumSideNodes;
-    const sibling = new SparseMerkleSolidityNode(compactMembershipProof.SiblingData);
-
-    const solidityProof = new SparseCompactMerkleSolidityProof(
-      proofSideNodes,
-      nonMembershipLeaf,
-      bitmask,
-      numSideNodes,
-      sibling,
+    // SHA256でハッシュ化した値をkeyとして使用する
+    const keys = Array.from(
+      {
+        length: 100,
+      },
+      (_, i) => hash(uintToBytes32(i)),
     );
 
-    return { solidityProof, keyToProve, data, smt };
-  };
+    before(() => {
+      keys.forEach(key => smt.update(key, data));
+    });
 
-  const checkBadData = async (
-    solidityProof: SparseCompactMerkleSolidityProof,
-    keyToProve: string,
-    data: string,
-    smt: SparseMerkleTree,
-  ) => {
-    const badData = uintToBytes32(999);
+    it("checks invalid data against the proof", async () => {
+      const keyToProve = keys[51];
+      const solidityProof = buildSolidityProof(smt.proveCompacted(keyToProve));
+      const badData = uintToBytes32(999);
 
-    // Valid membership proof
-    let verified = await smtContract.verifyCompact(solidityProof, keyToProve, data, smt.root);
-    expect(verified).to.be.true;
-    // Invalid membership proof
-    verified = await smtContract.verifyCompact(solidityProof, keyToProve, badData, smt.root);
-    expect(verified).to.be.false;
-  };
+      expect(await smtContract.verifyCompact(solidityProof, keyToProve, data, smt.root)).to.be.true;
+      expect(await smtContract.verifyCompact(solidityProof, keyToProve, badData, smt.root)).to.be.false;
+    });
 
-  const checkNonMembership = async (smt: SparseMerkleTree) => {
-    const nonMembershipIndex = 200;
-    const nonMembershipKey = hash(uintToBytes32(nonMembershipIndex));
+    it("checks non-membership proof", async () => {
+      const nonMembershipKey = hash(uintToBytes32(200));
+      const solidityProof = buildSolidityProof(smt.proveCompacted(nonMembershipKey));
+      const keyToProve = keys[51];
 
-    const compactMembershipProof = smt.proveCompacted(nonMembershipKey);
+      // non-membership proof: value=ZEROのmemberhsip proof
+      expect(await smtContract.verifyCompact(solidityProof, nonMembershipKey, ZERO, smt.root)).to.be.true;
+      expect(await smtContract.verifyCompact(solidityProof, keyToProve, ZERO, smt.root)).to.be.false;
+    });
+  });
 
-    // Need to convert typescript proof (with raw data) into solidity proof (with nodes):
-    const proofSideNodes = compactMembershipProof.SideNodes;
-    const nonMembershipLeaf = new SparseMerkleSolidityNode(compactMembershipProof.NonMembershipLeafData);
-    const bitmask = compactMembershipProof.BitMask;
-    const numSideNodes = compactMembershipProof.NumSideNodes;
-    const sibling = new SparseMerkleSolidityNode(compactMembershipProof.SiblingData);
+  describe("add branches and update", () => {
+    const smt = new SparseMerkleTree();
+    const data = uintToBytes32(42);
+    const newData = uintToBytes32(43);
+    const keys = [4, 8, 15, 16, 23, 42].map(num => hash(uintToBytes32(num)));
 
-    const solidityProof = new SparseCompactMerkleSolidityProof(
-      proofSideNodes,
-      nonMembershipLeaf,
-      bitmask,
-      numSideNodes,
-      sibling,
-    );
+    before(() => {
+      Array.from(
+        {
+          length: 100,
+        },
+        (_, i) => hash(uintToBytes32(i)),
+      ).forEach(key => smt.update(key, data));
+    });
 
-		const indexToProve = 51;
-		const keyToProve = hash(uintToBytes32(indexToProve));
-    // Valid Non-membership proof
-    let verified = await smtContract.verifyCompact(solidityProof, nonMembershipKey, ZERO, smt.root);
-    expect(verified).to.be.true;
+    it("adds branches and updates the tree", async () => {
+      const dsmst = new DeepSparseMerkleSubTree(smt.root);
+      const branches = addBranches(smt, dsmst, data, keys);
 
-    // Invalid Non-membership proof
-    verified = await smtContract.verifyCompact(solidityProof, keyToProve, ZERO, smt.root);
-    expect(verified).to.be.false;
-  };
+      const keyToUpdate = await updateData(smt, dsmst, smtContract, keys, branches, newData, 3);
+      await deleteData(smt, dsmst, smtContract, branches, keyToUpdate);
+    });
 
-  it("Proof verification", async () => {
-    const { solidityProof, keyToProve, data, smt } = await createTsSMT();
+    const addBranches = (
+      smt: SparseMerkleTree,
+      dsmst: DeepSparseMerkleSubTree,
+      data: string,
+      keys: string[],
+    ): SparseCompactMerkleBranch[] => {
+      return keys.map(key => {
+        const compactMembershipProof = smt.proveCompacted(key);
+        const res = dsmst.addBranchCompact(compactMembershipProof, key, data);
 
-    await checkBadData(solidityProof, keyToProve, data, smt);
-    await checkNonMembership(smt);
+        // Check proof is valid and branch was successfully added for typescript
+        expect(res);
+
+        return new SparseCompactMerkleBranch(buildSolidityProof(compactMembershipProof), key, data);
+      });
+    };
+
+    const updateData = async (
+      smt: SparseMerkleTree,
+      dsmst: DeepSparseMerkleSubTree,
+      smtContract: RevocationTree,
+      keys: string[],
+      branches: MerkleBranchStruct[],
+      newData: string,
+      keyIndex: number,
+    ) => {
+      const keyToUpdate = keys[keyIndex];
+      await smtContract.addBranchesAndUpdate(branches, smt.root, keyToUpdate, newData);
+      smt.update(keyToUpdate, newData);
+      dsmst.update(keyToUpdate, newData);
+
+      const solRoot = await smtContract.root();
+      expect(dsmst.root).to.equal(smt.root);
+      expect(solRoot).to.equal(dsmst.root);
+
+      return keyToUpdate;
+    };
+
+    const deleteData = async (
+      smt: SparseMerkleTree,
+      dsmst: DeepSparseMerkleSubTree,
+      smtContract: RevocationTree,
+      branches: MerkleBranchStruct[],
+      keyToDelete: string,
+    ) => {
+      smt.delete(keyToDelete);
+      dsmst.delete(keyToDelete);
+      await smtContract.addBranchesAndDelete(branches, smt.root, keyToDelete);
+
+      const solRoot = await smtContract.root();
+      expect(dsmst.root).to.equal(smt.root);
+      expect(solRoot).to.equal(dsmst.root);
+    };
   });
 });
