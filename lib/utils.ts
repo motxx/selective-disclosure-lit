@@ -1,4 +1,4 @@
-import { EncryptedText } from './types/encryption';
+import { EncryptedText } from './constants/encryption';
 
 export function blobToString(b: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
